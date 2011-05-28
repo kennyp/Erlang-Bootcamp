@@ -1,2 +1,4 @@
 *.beam
-*/ebin
+*/ebin/*
+*/deps/*
+*/erl_crash.dump
