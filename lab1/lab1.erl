@@ -38,6 +38,7 @@ start_link() ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
 init([]) ->
+    io:format("Starting the cache~n"),
     {ok, #state{}}.
 
 handle_call(size, _From, #state{cache=Cache}=State) ->
