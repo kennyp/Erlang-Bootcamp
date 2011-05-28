@@ -71,5 +71,53 @@ code_change(_OldVsn, State, _Extra) ->
 sock_opts() ->
     [{active, false}, {packet, line}, {reuseaddr, true}, list].
 
-new_connection(_IpAddr, _Port, _Sock, State) ->
+new_connection(_IpAddr, _Port, Sock, State) ->
+    Handler = spawn(fun() -> handle_client(Sock) end),
+    gen_tcp:controlling_process(Sock, Handler),
+    Handler ! go,
     {ok, State}.
+
+
+handle_client(Sock) ->
+    receive
+        go ->
+            read_input(Sock)
+    end.
+
+read_input(Sock) ->
+    inet:setopts(Sock, [{active, once}]),
+    receive
+        {tcp, Sock, Data} ->
+            case process_command(string:tokens(Data, " \r\n"), Sock) of
+                stop -> ok;
+                _ -> read_input(Sock)
+            end;
+        {tcp_closed, Sock} ->
+            io:format("Client closed connection~n"),
+            ok;
+        {tcp_error, Sock, _Reason} ->
+            io:format("Network error~n"),
+            ok
+    after 10000 ->
+            ok
+    end.
+
+process_command(["get", Key], Sock) ->
+    case cache:get(Key) of
+        not_found ->
+            gen_tcp:send(Sock, "-err\r\n");
+        Value ->
+            gen_tcp:send(Sock, ["+ok ", Value, "\r\n"])
+    end,
+    ok;
+process_command(["put", Key, Value], Sock) ->
+    cache:put(Key, Value),
+    gen_tcp:send(Sock, "-ok\r\n"),
+    ok;
+process_command(["del", Key], Sock) ->
+    cache:del(Key),
+    gen_tcp:send(Sock, "-ok\r\n"),
+    ok;
+process_command(_Msg, _Sock) ->
+    stop.
+
