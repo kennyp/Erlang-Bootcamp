@@ -1,0 +1,10 @@
+{application,cache,
+             [{description,[]},
+              {vsn,"1"},
+              {registered,[]},
+              {applications,[kernel,stdlib]},
+              {mod,{cache_app,[]}},
+              {env,[]},
+              {modules,[cache,cache_app,cache_net_handler,
+                        cache_net_handler_sup,cache_net_listener,cache_sup,
+                        gen_nb_server,thing_sup_sup]}]}.

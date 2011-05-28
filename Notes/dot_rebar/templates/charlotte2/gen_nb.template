@@ -1,0 +1,3 @@
+{variables, [{name, "nb_socket_listener"}]}.
+
+{template, "gen_nb_skel.erl", "{{name}}.erl"}.

@@ -1,0 +1,3 @@
+{variables, [{name, "myworker"}, {fn, "new_worker"}]}.
+
+{template, "simple_one_for_one_skel.erl", "{{name}}_sup.erl"}.
